@@ -75,6 +75,7 @@ void printUsage(){
     cout << "   write_txt <int>              not 0 for .txt ouput.\n";
     cout << "   write_bin <int>              not 0 for .bin ouput.\n";
     cout << "   write_traj_file              not 0 to write the trajfile.\n";
+    cout << "   img_signal                   not 0 to write the imaginary part.\n";
 
     cout << "   <obstacle>                   Obstacle definition tag.\n";
     cout << "   <cylinder_gamma_packing>     Gamma cylinders obstacles tag.\n";

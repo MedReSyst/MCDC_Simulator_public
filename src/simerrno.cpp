@@ -1109,13 +1109,13 @@ void SimErrno::error(string message, ostream &out, bool color)
 void SimErrno::expectedTime(string completed, string time, ostream & out, bool color, string steps_second ,string endl_str)
 {
     if(color){
-        std::string message = string(SH_FG_GREEN) + "[INFO]"+ SH_DEFAULT + "    [Completed: " + completed +"%]"  +  " [ETA: " + time + "]" +
-                " ( "+ steps_second + " steps/second)" + endl_str;
+        std::string message = string(SH_FG_GREEN) + "\n [INFO]"+ SH_DEFAULT + "    [Completed: " + completed +"%]"  +  " [ETA: " + time + "]" +
+                " ( "+ steps_second + " steps/second)" + endl_str + "\n";
         out << message;
         out.flush();
     }
     else{
-        std::string message = "[INFO]    [Completed: " + completed +"%] "  +  " [ETA: " + time + "]"+" ( "+ steps_second + " steps/second)" + endl_str;
+        std::string message = "\n [INFO]    [Completed: " + completed +"%] "  +  " [ETA: " + time + "]"+" ( "+ steps_second + " steps/second)" + endl_str + "\n";
         out << message;
         out.flush();
     }

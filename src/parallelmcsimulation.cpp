@@ -1,6 +1,7 @@
 #include "parallelmcsimulation.h"
 #include <iomanip>
 #include <vector>
+#include <iostream>
 #include "constants.h"
 #include "simerrno.h"
 #include "cylindergammadistribution.h"
@@ -87,6 +88,8 @@ void ParallelMCSimulation::startSimulation()
 
     SimErrno::info( " All " + to_string(params.num_proc) +  " simulations ended after: " + DynamicsSimulation::secondsToMinutes(mean_second_passed)
                     + " in average",cout  );
+                    
+    SimErrno::info(" Imaginary part " + to_string(params.img_signal == true),cout );
 
     SimErrno::info( " Joining resulting data... ",cout  );
 
@@ -232,15 +235,15 @@ void ParallelMCSimulation::jointResults()
                 phase_bout.open(boutPhase, std::ofstream::binary);   //phase shift (binary)
 
             if(params.write_txt)
-                phase_out.open(outPhase, std::ofstream::out);     //phase shift  (txt)
+                phase_out.open(outPhase, std::ofstream::out);        //phase shift  (txt)
         }
 
         if(params.write_txt){
             dwi_out.open(outDWI  ,std::ofstream::out);       //real part
 
-
             if(params.img_signal == true)
-             dwii_out.open(outDWIi,std::ofstream::out);       //img part
+              cout<<"image_signal: " << params.img_signal;
+              dwii_out.open(outDWIi,std::ofstream::out);       //img part
 
             if(params.separate_signals == true){
                 dwi_intra_out.open(outDWI_intra ,std::ofstream::out);       //intra part
@@ -249,10 +252,11 @@ void ParallelMCSimulation::jointResults()
         }
 
         if(params.write_bin){
-            dwi_bout.open(boutDWI  ,std::ofstream::binary);       //real part (binary)
+            dwi_bout.open(boutDWI,std::ofstream::binary);       //real part (binary)
 
-            if(params.img_signal == true)
-                {dwii_bout.open(boutDWIi,std::ofstream::binary);}       //img part  (binary)
+            if(params.img_signal == true){
+                dwii_bout.open(boutDWIi,std::ofstream::binary);     //img part  (binary)
+            }       
 
             if(params.separate_signals == true){
                 dwi_intra_bout.open(boutDWI_intra ,std::ofstream::binary);       //intra part
@@ -272,7 +276,7 @@ void ParallelMCSimulation::jointResults()
             for(unsigned p = 0; p < params.num_proc; p++)
             {
                 DWI+=  simulations[p]->dataSynth->DWI[i];       //real part
-
+                
                 if(params.img_signal == true)
                     DWIi+= simulations[p]->dataSynth->DWIi[i];      //img  part
 
@@ -292,7 +296,7 @@ void ParallelMCSimulation::jointResults()
 
             if(params.write_txt){
                 dwi_out  << DWI << std::endl;
-
+ 
                 if(params.img_signal == true)
                     dwii_out << DWIi << std::endl;
 
@@ -315,6 +319,7 @@ void ParallelMCSimulation::jointResults()
                 if(params.separate_signals){
                     float holder = float(DWI_intra);
                     dwi_intra_bout.write(reinterpret_cast<char *>(&holder), sizeof(float));
+                    
                     holder = float(DWI_extra);
                     dwi_extra_bout.write(reinterpret_cast<char *>(&holder), sizeof(float));
                 }
@@ -358,7 +363,7 @@ void ParallelMCSimulation::jointResults()
         }
         if(params.write_bin){
             dwi_bout.close();
-
+            
             if(params.img_signal == true)
                 dwii_bout.close();
 
@@ -376,7 +381,6 @@ void ParallelMCSimulation::jointResults()
 
 
      // ICVF for subdivisions
-
     for(unsigned i = 0 ; i < simulations.size();i++){
         stuck_count   += simulations[i]->dynamicsEngine->sentinela.stuck_count;
         illegal_count += simulations[i]->dynamicsEngine->sentinela.illegal_count;
@@ -437,6 +441,7 @@ void ParallelMCSimulation::jointResults()
 
         if(params.write_bin){
             dwi_bout.open(bout_vox_DWI  ,std::ofstream::binary);       //real part (binary)
+            
             if(params.img_signal == true)
                 dwii_bout.open(bout_vox_DWIi,std::ofstream::binary);       //img part  (binary)
 
@@ -457,8 +462,7 @@ void ParallelMCSimulation::jointResults()
             // #Num_voxels
             dwi_out  << simulations[0]->dataSynth->subdivisions.size() << endl;
 
-            if(params.img_signal == true)
-            {
+            if(params.img_signal == true){
                 dwii_out << simulations[0]->dataSynth->subdivisions.size() << endl;
                 dwii_out << simulations[0]->dataSynth->DWI.size() << endl;
             }
@@ -475,6 +479,7 @@ void ParallelMCSimulation::jointResults()
                 dwi_extra_out  << simulations[0]->dataSynth->DWI.size() << endl;
             }
         }
+
         //## HEADER (Binary)
         if(params.write_bin){
             // #Num_voxels
@@ -508,6 +513,7 @@ void ParallelMCSimulation::jointResults()
             double density_intra = 0;
             double density_extra = 0;
             double density = 0;
+            
             for(unsigned p = 0; p < params.num_proc; p++){
 
                 density_intra +=  simulations[p]->dataSynth->subdivisions[s].density_intra;
@@ -518,7 +524,6 @@ void ParallelMCSimulation::jointResults()
             PDen_out << density << endl;
             PDen_out << density_intra << endl;
             PDen_out << density_extra << endl;
-
 
             for (unsigned i = 0 ; i < simulations[0]->dataSynth->DWI.size(); i++ )
             {
@@ -585,6 +590,7 @@ void ParallelMCSimulation::jointResults()
         }
         if(params.write_bin){
             dwi_bout.close();
+            
             if(params.img_signal == true)
                 dwii_bout.close();
 
@@ -596,7 +602,6 @@ void ParallelMCSimulation::jointResults()
 
         PDen_out.close();
     }
-
 
     //====================================================================================================
     // NEW Join propagator join solution

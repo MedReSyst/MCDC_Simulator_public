@@ -182,6 +182,11 @@ void Parameters::readSchemeFile(std::string conf_file_path)
            this->separate_signals = true;
            this->computeVolume = true;
         }
+        else if( str_dist(tmp,"img_signal") <= 1 )
+        {
+           this->img_signal = true;
+//            this->computeVolume = true;
+        }
         else if( str_dist(tmp,"log_phase_shift") <= 2 )
         {
            this->log_phase_shift = true;
